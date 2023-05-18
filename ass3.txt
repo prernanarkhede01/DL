@@ -545,3 +545,98 @@ Next, i will be using the model.evaluate() and model.predict() methods.
 The model.evaluate() is used to only check the MSE, RMSE, MAE values of our model when the testing data is used. This does not provide us with the results the model would predict. Therefore to see the results that the model would predict, i have used the model.predict() function. Later I have plotted the actual and predicted values of the test data to see how well our model has performed.
 
 Ref: https://stackoverflow.com/questions/44476706/what-is-the-difference-between-keras-model-evaluate-and-model-predict
+
+
+
+
+
+
+
+
+
+
+
+# evaluate the model
+mse, mae = model.evaluate(X_test, y_test, verbose=0)
+print('MSE: %.3f, RMSE: %.3f, MAE: %.3f' % (mse, np.sqrt(mse), mae)) 
+
+
+
+
+
+
+
+
+
+
+# predicting y_test values
+print(X_test.shape)
+predicted_values = model.predict(X_test)
+print(predicted_values.shape)
+# print(predicted_values)
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+
+plt.plot(y_test,c = 'r')
+plt.plot(predicted_values,c = 'y')
+plt.xlabel('Day')
+plt.ylabel('Stock Price Volume')
+plt.title('Stock Price Volume Prediction Graph using RNN (LSTM)')
+plt.legend(['Actual','Predicted'],loc = 'lower right')
+plt.figure(figsize=(10,6))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Using R Squared
+
+The R squared is a metric we can use to evaluate how well our regression based (model that handle continuous data) have performed.
+
+R squared can vary between 0 and 1 and we can evaluate our model using this metric, while a negative value would mean that the training has not been done properly.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# evaluating using R squared
+R_square = r2_score(y_test, predicted_values) 
+ 
+print(R_square)
