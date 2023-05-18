@@ -1,1 +1,66 @@
+ 
 
+```
+# This is formatted as code
+```
+Recurrent neural network (RNN) Use the Google stock prices dataset and design a time series analysis and prediction system using RNN.
+
+
+
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+import datetime
+import seaborn as sns
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM
+from sklearn.metrics import r2_score
+
+
+
+#data=pd.read_csv("/content/Google_Stock_Price_Train.csv",index_col='Date',parse_dates=True)
+data=pd.read_csv("/content/Google_Stock_Price_Train.csv")
+data
+
+
+
+data['Close']=data['Close'].str.replace(',','').astype(float)
+data['Volume']=data['Volume'].str.replace(',','').astype(float)
+
+
+
+
+In the dataset, the Volume column had thousand seperated values, which is taken as string when usually loading to Pandas DataFrame. I have specified that ',' is used as the thousand separator when loading, so that the ',' will not be there when loading to our program. Then it'll be loaded as a numerical value.
+
+Plotting the Data
+
+
+
+
+
+
+ax1 = data.plot(x="Date", y=["Open", "High", "Low", "Close"],  figsize=(18,10),title='Open, High, Low, Close Stock Prices of Google Stocks')
+ax1.set_ylabel("Stock Price")
+
+ax2 = data.plot(x="Date", y=["Volume"],  figsize=(18,9))
+ax2.set_ylabel("Stock Volume")
+
+
+
+
+When inspecting the first plot, we can see that in the closing value of stock prior to 2014/03/26, there is a significant gap between the closing price and the other prices, where as after this date, the closing price has also been closer to other prices.
+
+When inspecting the second plot, we can see that there are significant fluctuations in the Stock Volume over the time. And it is quite hard to find a trend/pattern in this the data in Stock Volume (the one we need to predict).
+
+Preprocessing Data
+Preprocessing data includes handling missing values and outliers, applying feature coding techniques if needed, scale & standardize features.
+
+Checking for Missing values
