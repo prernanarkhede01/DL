@@ -64,3 +64,296 @@ Preprocessing Data
 Preprocessing data includes handling missing values and outliers, applying feature coding techniques if needed, scale & standardize features.
 
 Checking for Missing values
+
+
+
+
+
+
+
+
+# Getting a summary of missing values for each field/attribute
+print(data.isnull().sum())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+We can see that there are no missing values in the dataset.
+
+Handling Outliers
+
+According to the above graph plots that indicate the Open, High, Low and Close values of the Stock prices, the Close price is as mentioned earlier, has a significant gap with the other values. The surprising fact is that, the Close value has even become higher than the High value (highest price of stock for a given day), which is not real.
+
+Ref: https://www.mit.edu/~mbarker/formula1/f1help/11-ch-10.htm
+
+Let us also check outliers for attributes by using box plots as follows.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+data[['Open','High','Low','Close','Volume']].plot(kind= 'box' ,layout=(1,5),subplots=True, sharex=False, sharey=False, figsize=(20,6),color='blue')
+plt.show()
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     We can see that there are outliers in the Close and Volume attributes. However, i will not remove any outliers here since there are only a limited number of datapoints (less than 1300) and if we remove outliers, the dataset will become even smaller.
+
+Feature Encoding
+
+When we check the 1st 10 records of the dataset, we could see that all the data in the dataset are numerical data, and there are no categorical data that needs encoding. Therefore, no feature encoding process was carried out on this dataset.
+
+Feature Scaling
+
+MinMaxScaler, which is said to be better to be used with time-series data, was used on this dataset for the feature scaling purposes.
+
+https://machinelearningmastery.com/normalize-standardize-time-series-data-python/
+
+The following set of graphs show the attribute histogram before scaling
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+data.hist()
+
+
+
+
+
+
+
+
+
+data
+
+
+
+
+
+
+
+
+
+scaler = MinMaxScaler()
+data_without_date = data[['Open','High','Low','Close','Volume']]
+data_scaled = pd.DataFrame(scaler.fit_transform(data_without_date))
+
+
+
+
+
+
+
+
+data_scaled
+
+
+
+
+
+
+
+
+
+
+
+     
+
+data_scaled.hist()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Feature Engineering
+Drawing the Correlation Matrix Correlation Coefficient checking mechanism checks the relationship between the different features with the predicting attribute.
+
+
+
+
+
+
+
+
+
+plt.figure(figsize=(6,6))
+sns.heatmap(data.corr())
+
+
+
+
+
+
+
+
+
+
+We can see from the correlation matrix that the features Open, High, and Low, all are highly correlated with each other. Therefore, it is sufficient to consider only one feature from the above 3 features and remove the rest.
+
+Furthermore, I am removing the Close field since it contains many abnormal data values, which is like a contexual outlier.
+
+
+
+
+
+
+
+
+
+
+
+data_scaled=data_scaled.drop([1,2,4], axis=1)
+data_scaled
+
+
+
+
+
+
+
+
+
+
+
+
+
+Developing the RNN Model
+
+When developing an RNN Model, we have to reshape the data that we are feeding into the model. To do that, first we have to find a pattern in the data available and define the number of timesteps according to the pattern.
+
+When considering the plots we have created for this we could not see a clear cut pattern/trend in the data by just visual inspection. Therefore, I have taken the following code snippet to split the data into a sequence by trying to identify any pattern available.
+
+Since there are two features in our dataset after cleaning, I have used a split sequence method for a multivariate dataset.
+
+
+
+
+
+
+
+
+
+
+
+
+def split_seq_multivariate(sequence, n_past, n_future):
+    
+    '''
+    n_past ==> no of past observations
+    n_future ==> no of future observations 
+    '''
+    x, y = [], [] 
+    for window_start in range(len(sequence)):
+        past_end = window_start + n_past
+        future_end = past_end + n_future
+        if future_end > len(sequence):
+            break
+        # slicing the past and future parts of the window
+        past   = sequence[window_start:past_end, :]
+        future = sequence[past_end:future_end, -1]
+        x.append(past)
+        y.append(future)
+    
+    return np.array(x), np.array(y)
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     In RNN, since we are dealing with time series data, we have to specify how many past data points we will be considering when generating the sequence.
+
+In here, i have taken 60 past data points (time steps) when generating the data sequences.
+
+
+
+
+
+
+
+
+
+
+# specify the window size
+n_steps = 60
+
+data_scaled = data_scaled.to_numpy()
+data_scaled.shape
