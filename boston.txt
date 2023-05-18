@@ -1,1 +1,17 @@
+import pandas as pd
+import numpy as np
+from sklearn import metrics
+import matplotlib.pyplot as plt
+import seaborn as sns
+%matplotlib inline
+import pandas as pd
 
+
+
+data=pd.read_csv("/content/housing (1).csv")
+
+
+data
+
+
+data.dtypes
